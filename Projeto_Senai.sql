@@ -178,3 +178,45 @@ BEGIN
         WHERE PatrimonioID IN (SELECT PatrimonioID FROM deleted);
 END
 GO
+
+--Inserts
+INSERT INTO Area (NomeArea) VALUES
+('Bloco A - Térreo'),
+('Bloco A - 1º Andar')
+
+INSERT INTO TipoUsuario (NomeTipo) VALUES
+('Responsável'),
+('Coordenador')
+
+INSERT INTO Cargo(NomeCargo) VALUES
+('Diretor'),
+('Instrutor de Formação Prosissional II')
+
+INSERT INTO TipoPatrimonio(NomeTipo) VALUES
+('Mesa'),
+('Notebook')
+
+INSERT INTO StatusPatrimonio([Status]) VALUES
+('Inativo'),
+('Ativo'),
+('Transferido'),
+('Em manutenção')
+
+INSERT INTO StatusTransferencia ([Status]) VALUES
+('Aprovado'),
+('Recusado'),
+('Pendente de aprovação')
+
+INSERT INTO TipoAlteracao(Tipo)VALUES
+('Modificação'),
+('Transferencia')
+
+INSERT INTO Cidade(NomeCidade, Estado) VALUES
+('São Caetano do Sul', 'São Paulo'),
+('Diadema', 'São Paulo')
+
+INSERT INTO [Local] (Nome, LocalSap, Descricao, AreaID) VALUES
+('Manutenção', NULL,NULL, (SELECT AreaID FROM Area WHERE NomeArea = 'Bloco A - Térreo' ))
+
+INSERT INTO Bairro (NomeBairro, CidadeID) VALUES
+('Centro',(SELECT CidadeID FROM Cidade WHERE NomeCidade = 'São Caetano do Sul'))
