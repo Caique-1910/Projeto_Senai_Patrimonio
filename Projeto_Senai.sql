@@ -145,3 +145,35 @@ StatusPatrimonioID UNIQUEIDENTIFIER FOREIGN KEY REFERENCES StatusPatrimonio(Stat
 );
 GO
 
+CREATE TRIGGER trg_Usuario_SoftDelete
+ON Usuario
+INSTEAD OF DELETE
+AS
+BEGIN
+    UPDATE Usuario
+        SET Ativo = 0
+        WHERE UsuarioID IN (SELECT UsuarioID FROM deleted);
+END
+GO
+
+CREATE TRIGGER trg_Local_SoftDelete
+ON [Local]
+INSTEAD OF DELETE
+AS
+BEGIN
+    UPDATE [Local]
+        SET Ativo = 0
+        WHERE LocalID IN (SELECT LocalID FROM deleted);
+END
+GO
+
+
+CREATE TRIGGER trg_Patrimonio_SoftDelete
+ON Patrimonio
+INSTEAD OF DELETE
+AS
+BEGIN
+    UPDATE Patrimonio
+        SET StatusPatrimonioID = (SELECT StatusPatrimonioID FROM StatusPatrimonio WHERE [Status] = 'Inativo')    
+END
+GO
