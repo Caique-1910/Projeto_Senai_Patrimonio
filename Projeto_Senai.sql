@@ -175,5 +175,6 @@ AS
 BEGIN
     UPDATE Patrimonio
         SET StatusPatrimonioID = (SELECT StatusPatrimonioID FROM StatusPatrimonio WHERE [Status] = 'Inativo')    
+        WHERE PatrimonioID IN (SELECT PatrimonioID FROM deleted);
 END
 GO
