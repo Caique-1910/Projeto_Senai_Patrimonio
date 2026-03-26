@@ -27,6 +27,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<AreaService>();
 
+//Locais
+builder.Services.AddScoped<ILocalRepository, LocalRepository>();
+builder.Services.AddScoped<LocalService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

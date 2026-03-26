@@ -52,7 +52,7 @@ namespace SistemaPatrimonio.Applications.Services
 
             Area areaExistetente = _repository.BuscarPorNome(dto.NomeArea);
 
-            if (areaExistetente == null) 
+            if (areaExistetente != null) 
             {
                 throw new DomainException("Já existe uma área cadastrada com esse nome.");
             }
