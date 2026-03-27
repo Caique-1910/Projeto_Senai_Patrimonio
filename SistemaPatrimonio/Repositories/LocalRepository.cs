@@ -55,5 +55,10 @@ namespace SistemaPatrimonio.Repositories
         {
             return _context.Area.Any(area => area.AreaID == areaId);
         }
+
+        public Local BuscarPorNome(string nomeLocal, Guid areaId)
+        {
+            return _context.Local.FirstOrDefault(local => local.Nome.ToLower() == nomeLocal.ToLower() && local.AreaID == areaId);
+        }
     }
 }
