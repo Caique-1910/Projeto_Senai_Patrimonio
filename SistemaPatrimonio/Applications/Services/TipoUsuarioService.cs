@@ -33,7 +33,7 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (tipoUsuario == null)
             {
-                return null;
+                throw new Exception("Tipo de usuário não encontrado");
             }
 
             return new ListarTipoUsuarioDto

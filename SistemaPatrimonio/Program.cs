@@ -43,6 +43,27 @@ builder.Services.AddScoped<BairroService>();
 builder.Services.AddScoped<IEnderecoRepository, EnderecoRepository>();
 builder.Services.AddScoped<EnderecoService>();
 
+//TipoUsuario
+builder.Services.AddScoped<ITipoUsuarioRepository, TipoUsuarioRepository>();
+builder.Services.AddScoped<TipoUsuarioService>();
+
+//TipoAlteracao
+builder.Services.AddScoped<ITipoAlteracaoRepository, TipoAlteracaoRepository>();
+builder.Services.AddScoped<TipoAlteracaoService>();
+
+//TipoPatrimonio
+builder.Services.AddScoped<ITipoPatrimonioRepository, TipoPatrimonioRepository>();
+builder.Services.AddScoped<TipoPatrimonioService>();
+
+//StatusTransferencia
+builder.Services.AddScoped<IStatusTransferenciaRepository, StatusTransferenciaRepository>();
+builder.Services.AddScoped<StatusTransferenciaService>();
+
+//Usuario
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<UsuarioService>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

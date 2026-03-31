@@ -220,3 +220,8 @@ INSERT INTO [Local] (Nome, LocalSap, Descricao, AreaID) VALUES
 
 INSERT INTO Bairro (NomeBairro, CidadeID) VALUES
 ('Centro',(SELECT CidadeID FROM Cidade WHERE NomeCidade = 'São Caetano do Sul'))
+
+
+Colocado Posteriormente
+--ALTER TABLE Usuario
+--ADD PrimeiroAcesso BIT NOT NULL DEFAULT 1

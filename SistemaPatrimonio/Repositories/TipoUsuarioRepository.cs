@@ -15,7 +15,7 @@ namespace SistemaPatrimonio.Repositories
 
         public List<TipoUsuario> Listar()
         {
-            return _context.TipoUsuario.ToList();
+            return _context.TipoUsuario.OrderBy(tu => tu.NomeTipo).ToList();
         }
 
         public TipoUsuario BuscarPorId(Guid tipoUsuarioId)
