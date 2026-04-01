@@ -52,8 +52,44 @@ namespace SistemaPatrimonio.Repositories
         }
 
         public Usuario BuscarPorNome(string nome)
-        { 
+        {
             return _context.Usuario.FirstOrDefault(u => u.Nome.ToLower() == nome.ToLower());
+        }
+
+        public void AtualizarSenha(Usuario usuario)
+        {
+            if (usuario == null)
+            {
+                return;
+            }
+
+            Usuario usuarioBanco = _context.Usuario.Find(usuario.UsuarioID);
+
+            if (usuarioBanco == null)
+            {
+                return;
+            }
+
+            usuarioBanco.Senha = usuario.Senha;
+            _context.SaveChanges();
+        }
+
+        public void AtualizarStatus(Usuario usuario)
+        {
+            if (usuario == null)
+            {
+                return;
+            }
+
+            Usuario usuarioBanco = _context.Usuario.Find(usuario.UsuarioID);
+
+            if (usuarioBanco == null)
+            {
+                return;
+            }
+
+            usuarioBanco.Ativo = usuario.Ativo;
+            _context.SaveChanges();
         }
     }
 }

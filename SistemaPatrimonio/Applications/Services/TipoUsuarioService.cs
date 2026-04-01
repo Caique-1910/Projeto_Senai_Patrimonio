@@ -1,6 +1,7 @@
 ﻿using SistemaPatrimonio.Applications.Regras;
 using SistemaPatrimonio.Domains;
 using SistemaPatrimonio.DTOs.TipoUsuarioDto;
+using SistemaPatrimonio.Exceptions;
 using SistemaPatrimonio.Interfaces;
 
 namespace SistemaPatrimonio.Applications.Services
@@ -51,7 +52,7 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (tipoUsuarioExistente != null)
             {
-                throw new Exception("Já existe um tipo de usuário com esse nome.");
+                throw new DomainException("Já existe um tipo de usuário com esse nome.");
             }
 
             TipoUsuario tipoUsuario = new TipoUsuario
@@ -71,14 +72,14 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (tipoUsuarioExistente == null)
             {
-                throw new Exception("Tipo de usuário não encontrado.");
+                throw new DomainException("Tipo de usuário não encontrado.");
             }
 
             TipoUsuario tipoUsuarioComMesmoNome = _repository.BuscarPorNome(dto.NomeTipo);
 
             if (tipoUsuarioComMesmoNome != null )
             {
-                throw new Exception("Já existe um tipo de usuário com esse nome.");
+                throw new DomainException("Já existe um tipo de usuário com esse nome.");
             }
 
             tipoUsuarioExistente.NomeTipo = dto.NomeTipo;

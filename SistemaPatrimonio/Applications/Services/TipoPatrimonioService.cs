@@ -52,7 +52,7 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (tipoPatrimonioExistente != null)
             {
-                throw new Exception("Já existe um tipo de patrimônio com esse nome.");
+                throw new DomainException("Já existe um tipo de patrimônio com esse nome.");
             }
 
             TipoPatrimonio tipoPatrimonio = new TipoPatrimonio
@@ -72,14 +72,14 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (tipoPatrimonioExistente == null)
             {
-                throw new Exception("Tipo de patrimônio não encontrado.");
+                throw new DomainException("Tipo de patrimônio não encontrado.");
             }
 
             TipoPatrimonio tipoPatrimonioComMesmoNome = _repository.BuscarPorNome(dto.NomeTipo);
 
             if (tipoPatrimonioComMesmoNome != null)
             {
-                throw new Exception("Já existe um tipo de patrimônio com esse nome.");
+                throw new DomainException("Já existe um tipo de patrimônio com esse nome.");
             }
 
             tipoPatrimonioExistente.NomeTipo = dto.NomeTipo;

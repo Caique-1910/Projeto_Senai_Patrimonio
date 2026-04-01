@@ -9,5 +9,7 @@ namespace SistemaPatrimonio.Interfaces
         void Adicionar(Usuario usuario);
         void Atualizar(Usuario usuario);
         Usuario BuscarPorNome(string nome);
+        void AtualizarSenha(Usuario usuario);
+        void AtualizarStatus(Usuario usuario);
     }
 }

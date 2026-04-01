@@ -52,7 +52,7 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (stExistente != null)
             {
-                throw new Exception("Já existe um tipo de alteração com esse nome.");
+                throw new DomainException("Já existe um tipo de alteração com esse nome.");
             }
 
             StatusTransferencia st = new StatusTransferencia
@@ -78,7 +78,7 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (stComMesmoNome != null)
             {
-                throw new Exception("Já existe um status transferência com esse nome.");
+                throw new DomainException("Já existe um status transferência com esse nome.");
             }
 
             stbanco.Status = dto.Status;

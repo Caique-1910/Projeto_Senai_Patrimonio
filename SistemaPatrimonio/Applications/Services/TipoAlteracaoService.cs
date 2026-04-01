@@ -51,7 +51,7 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (tipoAlteracaoExistente != null) 
             {
-                throw new Exception("Já existe um tipo de alteração com esse nome.");
+                throw new DomainException("Já existe um tipo de alteração com esse nome.");
             }
 
             TipoAlteracao tipoAlteracao = new TipoAlteracao
@@ -70,14 +70,14 @@ namespace SistemaPatrimonio.Applications.Services
 
             if (tipoAlteracaoExistente == null)
             {
-                throw new Exception("Tipo de alteração não encontrado.");
+                throw new DomainException("Tipo de alteração não encontrado.");
             }
 
             TipoAlteracao tipoAlteracaoComMesmoNome = _repository.BuscarPorNome(dto.TipoAlteracao);
 
             if (tipoAlteracaoComMesmoNome != null)
             {
-                throw new Exception("Já existe um tipo de alteração com esse nome.");
+                throw new DomainException("Já existe um tipo de alteração com esse nome.");
             }
 
 
