@@ -54,7 +54,7 @@ namespace SistemaPatrimonio.Applications.Services
 
         public void Adicionar(CriarEnderecoDto dto)
         {
-            Validar.ValidarNome(dto.Logradouro);
+            Validar.ValidarLogradouro(dto.Logradouro);
 
             Endereco? enderecoExistente = _repository.BuscarPorLogradouroENumero(dto.Logradouro, dto.Numero, dto.BairroID);
 

@@ -65,12 +65,12 @@ namespace SistemaPatrimonio.Controllers
             }
         }
 
-        [HttpPatch("{id}/atualizar-status")]
-        public ActionResult AtualizarStatus(Guid id, Guid statusPatrimonioId)
+        [HttpPatch("{id}/status")]
+        public ActionResult AtualizarStatus(Guid id, AtualizarStatusPatrimonioDto dto)
         {
             try
             {
-                _service.AtualizarStatus(id, statusPatrimonioId);
+                _service.AtualizarStatus(id, dto);
                 return NoContent();
             }
             catch (DomainException ex)

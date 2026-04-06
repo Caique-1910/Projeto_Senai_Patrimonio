@@ -1,4 +1,5 @@
-﻿using SistemaPatrimonio.Applications.Regras;
+﻿using SistemaPatrimonio.Applications.Autenticacao;
+using SistemaPatrimonio.Applications.Regras;
 using SistemaPatrimonio.Domains;
 using SistemaPatrimonio.DTOs.UsuarioDto;
 using SistemaPatrimonio.Exceptions;
@@ -39,11 +40,13 @@ namespace SistemaPatrimonio.Applications.Services
         public ListarUsuarioDto BuscarPorId(Guid usuarioId)
         {
             Usuario usuario = _repository.BuscarPorId(usuarioId);
+
             if (usuario == null)
             {
-                return null;
+                throw new DomainException("Usuário não encontrado.");
             }
-            ListarUsuarioDto listarUsuarioDto = new ListarUsuarioDto
+
+            ListarUsuarioDto usuarioDto = new ListarUsuarioDto
             {
                 UsuarioID = usuario.UsuarioID,
                 NIF = usuario.NIF,
@@ -56,18 +59,50 @@ namespace SistemaPatrimonio.Applications.Services
                 Ativo = usuario.Ativo,
                 PrimeiroAcesso = usuario.PrimeiroAcesso
             };
-            return listarUsuarioDto;
+
+            return usuarioDto;
         }
 
         public void Adicionar(CriarUsuarioDto dto)
         {
-            Validar.ValidarEstado(dto.Nome);
+            Validar.ValidarNome(dto.Nome);
+            Validar.ValidarNIF(dto.NIF);
+            Validar.ValidarCPF(dto.CPF);
+            Validar.ValidarEmail(dto.Email);
+            
+            Usuario usuarioDuplicado = _repository.BuscarDuplicado(dto.NIF, dto.CPF, dto.Email);
 
-            Usuario usuarioExistente = _repository.BuscarPorNome(dto.Nome);
-
-            if (usuarioExistente != null)
+            if (usuarioDuplicado != null)
             {
-                throw new Exception("Já existe um usuário com esse nome.");
+                if(usuarioDuplicado.NIF == dto.NIF)
+                {
+                    throw new DomainException("Já existe um usuário com esse NIF.");
+                }
+
+                if(usuarioDuplicado.CPF == dto.CPF)
+                {
+                    throw new DomainException("Já existe um usuário com esse CPF.");
+                }
+
+                if(usuarioDuplicado.Email.ToLower() == dto.Email.ToLower())
+                {
+                    throw new DomainException("Já existe um usuário com esse email.");
+                }
+            }
+
+            if (!_repository.EnderecoExiste(dto.EnderecoID))
+            {
+                throw new DomainException("Endereço não existe.");
+            }
+
+            if (!_repository.CargoExiste(dto.CargoID))
+            {
+                throw new DomainException("Cargo não existe.");
+            }
+
+            if (!_repository.TipoUsuarioExiste(dto.TipoUsuarioID))
+            {
+                throw new DomainException("Tipo usuário não existe.");
             }
 
             Usuario usuario = new Usuario
@@ -77,49 +112,85 @@ namespace SistemaPatrimonio.Applications.Services
                 RG = dto.RG,
                 CPF = dto.CPF,
                 CarteiraTrabalho = dto.CarteiraTrabalho,
-                Senha = dto.Senha,
-                Email = dto.Email
+                Senha = CriptografiaUsuario.CriptografarSenha(dto.NIF),
+                Email = dto.Email,
+                Ativo = true,
+                PrimeiroAcesso = true,
+                EnderecoID = dto.EnderecoID,
+                CargoID = dto.CargoID,
+                TipoUsuarioID = dto.TipoUsuarioID,
             };
+
             _repository.Adicionar(usuario);
         }
 
         public void Atualizar(Guid id, CriarUsuarioDto dto)
         {
             Validar.ValidarNome(dto.Nome);
+            Validar.ValidarNIF(dto.NIF);
+            Validar.ValidarCPF(dto.CPF);
+            Validar.ValidarEmail(dto.Email);
 
-            Usuario usuarioExistente = _repository.BuscarPorId(id);
+            Usuario usuarioBanco = _repository.BuscarPorId(id);
 
-            if (usuarioExistente == null)
+            if (usuarioBanco == null)
             {
                 throw new DomainException("Usuário não encontrado.");
             }
 
-            Usuario usuarioComMesmoNome = _repository.BuscarPorNome(dto.Nome);
+            Usuario usuarioDuplicado = _repository.BuscarDuplicado(dto.NIF, dto.CPF, dto.Email, id);
 
-            if (usuarioComMesmoNome != null)
+            if (usuarioDuplicado != null)
             {
-                throw new DomainException("Já existe um usuário com esse nome.");
+                if(usuarioDuplicado.NIF == dto.NIF)
+                {
+                    throw new DomainException("Já existe um usuário com esse NIF.");
+                }
+
+                if(usuarioDuplicado.CPF == dto.CPF)
+                {
+                    throw new DomainException("Já existe um usuário com esse CPF.");
+                }
+
+                if(usuarioDuplicado.Email.ToLower() == dto.Email.ToLower())
+                {
+                    throw new DomainException("Já existe um usuário com esse email.");
+                }
             }
 
-            Usuario usuario = new Usuario
+            if (!_repository.EnderecoExiste(dto.EnderecoID))
             {
-                UsuarioID = id,
-                NIF = dto.NIF,
-                Nome = dto.Nome,
-                RG = dto.RG,
-                CPF = dto.CPF,
-                CarteiraTrabalho = dto.CarteiraTrabalho,
-                Senha = dto.Senha,
-                Email = dto.Email
-            };
-            _repository.Atualizar(usuario);
+                throw new DomainException("Endereço não existe.");
+            }
+
+            if (!_repository.CargoExiste(dto.CargoID))
+            {
+                throw new DomainException("Cargo não existe.");
+            }
+
+            if (!_repository.TipoUsuarioExiste(dto.TipoUsuarioID))
+            {
+                throw new DomainException("Tipo usuário não existe.");
+            }
+
+            usuarioBanco.NIF = dto.NIF;
+            usuarioBanco.Nome = dto.Nome;
+            usuarioBanco.RG = dto.RG;
+            usuarioBanco.CPF = dto.CPF;
+            usuarioBanco.CarteiraTrabalho = dto.CarteiraTrabalho;
+            usuarioBanco.Email = dto.Email;
+            usuarioBanco.EnderecoID = dto.EnderecoID;
+            usuarioBanco.CargoID = dto.CargoID;
+            usuarioBanco.TipoUsuarioID = dto.TipoUsuarioID;
+
+            _repository.Atualizar(usuarioBanco);
         }
 
         public void AtualizarSenha(Guid id, AtualizarSenhaUsuarioDto dto)
         {
-            Usuario usuarioExistente = _repository.BuscarPorId(id);
+            Usuario usuarioBanco = _repository.BuscarPorId(id);
 
-            if (usuarioExistente == null)
+            if (usuarioBanco == null)
             {
                 throw new DomainException("Usuário não encontrado.");
             }
@@ -127,21 +198,22 @@ namespace SistemaPatrimonio.Applications.Services
             dto.SenhaAtual = dto.SenhaAtual.Trim();
             dto.NovaSenha = dto.NovaSenha.Trim();
 
-            _repository.AtualizarSenha(usuarioExistente);
+            _repository.AtualizarSenha(usuarioBanco);
         }
 
-        public void AtualizarStatus(Guid id, bool ativo)
+        public void AtualizarStatus(Guid id, AtualizarStatusUsuarioDto dto)
         {
-            Usuario usuarioExistente = _repository.BuscarPorId(id);
+            Usuario usuarioBanco = _repository.BuscarPorId(id);
 
-            if (usuarioExistente == null)
+            if (usuarioBanco == null)
             {
                 throw new DomainException("Usuário não encontrado.");
             }
 
-            usuarioExistente.Ativo = ativo;
-            _repository.AtualizarStatus(usuarioExistente);
+            usuarioBanco.Ativo = dto.Ativo;
+            _repository.AtualizarStatus(usuarioBanco);
         }
+
 
     }
 }

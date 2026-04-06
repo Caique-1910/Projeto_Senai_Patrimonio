@@ -1,4 +1,5 @@
-﻿using SistemaPatrimonio.Contexts;
+﻿using Microsoft.EntityFrameworkCore;
+using SistemaPatrimonio.Contexts;
 using SistemaPatrimonio.Domains;
 using SistemaPatrimonio.Interfaces;
 
@@ -20,7 +21,34 @@ namespace SistemaPatrimonio.Repositories
 
         public Usuario BuscarPorId(Guid usuarioId)
         {
-            return _context.Usuario.FirstOrDefault(u => u.UsuarioID == usuarioId);
+            return _context.Usuario.Find(usuarioId);
+        }
+
+        public Usuario BuscarDuplicado(string nif, string cpf, string email, Guid? usuarioId = null)
+        {
+            var consulta = _context.Usuario.AsQueryable();
+
+            if (usuarioId.HasValue)
+            {
+                consulta = consulta.Where(u => u.UsuarioID != usuarioId.Value);
+            }
+
+            return consulta.FirstOrDefault(u => u.NIF == nif || u.CPF == cpf || u.Email.ToLower() == email.ToLower());
+        }
+
+        public bool EnderecoExiste(Guid enderecoId)
+        {
+            return _context.Endereco.Any(e => e.EnderecoID == enderecoId);
+        }
+
+        public bool TipoUsuarioExiste(Guid tipoUsuarioId)
+        {
+            return _context.TipoUsuario.Any(t => t.TipoUsuarioID == tipoUsuarioId);
+        }
+
+        public bool CargoExiste(Guid cargoId)
+        {
+            return _context.Cargo.Any(c => c.CargoID == cargoId);
         }
 
         public void Adicionar(Usuario usuario)
@@ -43,34 +71,16 @@ namespace SistemaPatrimonio.Repositories
                 return;
             }
 
+            usuarioBanco.NIF = usuario.NIF;
             usuarioBanco.Nome = usuario.Nome;
+            usuarioBanco.RG = usuario.RG;
+            usuarioBanco.CPF = usuario.CPF;
+            usuarioBanco.CarteiraTrabalho = usuario.CarteiraTrabalho;
             usuarioBanco.Email = usuario.Email;
-            usuarioBanco.Senha = usuario.Senha;
             usuarioBanco.TipoUsuarioID = usuario.TipoUsuarioID;
+            usuarioBanco.CargoID = usuario.CargoID;
+            usuarioBanco.EnderecoID = usuario.EnderecoID;
 
-            _context.SaveChanges();
-        }
-
-        public Usuario BuscarPorNome(string nome)
-        {
-            return _context.Usuario.FirstOrDefault(u => u.Nome.ToLower() == nome.ToLower());
-        }
-
-        public void AtualizarSenha(Usuario usuario)
-        {
-            if (usuario == null)
-            {
-                return;
-            }
-
-            Usuario usuarioBanco = _context.Usuario.Find(usuario.UsuarioID);
-
-            if (usuarioBanco == null)
-            {
-                return;
-            }
-
-            usuarioBanco.Senha = usuario.Senha;
             _context.SaveChanges();
         }
 
@@ -91,5 +101,47 @@ namespace SistemaPatrimonio.Repositories
             usuarioBanco.Ativo = usuario.Ativo;
             _context.SaveChanges();
         }
+
+        public Usuario ObterPorNifComTipoUsuario(string nif)
+        {
+            return _context.Usuario.Include(u => u.TipoUsuario).FirstOrDefault(u => u.NIF == nif);
+        }
+
+        public void AtualizarSenha(Usuario usuario)
+        {
+            if (usuario == null)
+            {
+                return;
+            }
+
+            Usuario usuarioBanco = _context.Usuario.Find(usuario.UsuarioID);
+
+            if (usuarioBanco == null)
+            {
+                return;
+            }
+
+            usuarioBanco.Senha = usuario.Senha;
+            _context.SaveChanges();
+        }
+
+        public void AtualizarPrimeiroAcesso(Usuario usuario)
+        {
+            if (usuario == null)
+            {
+                return;
+            }
+
+            Usuario usuarioBanco = _context.Usuario.Find(usuario.UsuarioID);
+
+            if (usuarioBanco == null)
+            {
+                return;
+            }
+
+            usuarioBanco.PrimeiroAcesso = usuario.PrimeiroAcesso;
+            _context.SaveChanges();
+        }
+
     }
 }

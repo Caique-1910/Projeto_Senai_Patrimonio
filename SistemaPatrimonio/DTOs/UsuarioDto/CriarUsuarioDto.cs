@@ -15,5 +15,8 @@
         public byte[] Senha { get; set; } = null!;
 
         public string Email { get; set; } = null!;
+        public Guid EnderecoID { get; set; }
+        public Guid CargoID { get; set; }
+        public Guid TipoUsuarioID { get; set; }
     }
 }

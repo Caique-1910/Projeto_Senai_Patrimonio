@@ -57,7 +57,7 @@ namespace SistemaPatrimonio.Repositories
             _context.SaveChanges();
         }
 
-        public SolicitacaoTransferencia ObrterPorJustificativa(string jus)
+        public SolicitacaoTransferencia ObterPorJustificativa(string jus)
         {
             return _context.SolicitacaoTransferencia.FirstOrDefault(p => p.Justificativa.ToLower() == jus.ToLower());
         }

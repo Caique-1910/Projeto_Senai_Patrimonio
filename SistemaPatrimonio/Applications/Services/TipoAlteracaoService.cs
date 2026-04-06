@@ -47,6 +47,8 @@ namespace SistemaPatrimonio.Applications.Services
 
         public void Adicionar(CriarTipoAlteracaoDto dto) 
         {
+            Validar.ValidarNome(dto.TipoAlteracao);
+
             TipoAlteracao tipoAlteracaoExistente = _repository.BuscarPorNome(dto.TipoAlteracao);
 
             if (tipoAlteracaoExistente != null) 

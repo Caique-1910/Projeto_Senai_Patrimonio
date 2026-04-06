@@ -1,4 +1,5 @@
-﻿using SistemaPatrimonio.Domains;
+﻿using SistemaPatrimonio.Applications.Regras;
+using SistemaPatrimonio.Domains;
 using SistemaPatrimonio.DTOs.PatrimonioDto;
 using SistemaPatrimonio.Exceptions;
 using SistemaPatrimonio.Interfaces;
@@ -106,7 +107,7 @@ namespace SistemaPatrimonio.Applications.Services
             _repository.Atualizar(patrimonio);
         }
 
-            public void AtualizarStatus(Guid patrimonioId, Guid statusPatrimonioId)
+            public void AtualizarStatus(Guid patrimonioId, AtualizarStatusPatrimonioDto dto)
             {
                 Patrimonio patrimonio = _repository.BuscarPorId(patrimonioId);
     
@@ -115,7 +116,7 @@ namespace SistemaPatrimonio.Applications.Services
                     throw new DomainException("Patrimônio não encontrado");
                 }
     
-                patrimonio.StatusPatrimonioID = statusPatrimonioId;
+                patrimonio.StatusPatrimonioID = dto.StatusPatrimonioID;
     
                 _repository.AtualizarStatus(patrimonio);
         }
