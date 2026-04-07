@@ -46,5 +46,13 @@ namespace SistemaPatrimonio.Applications.Regras
                 throw new DomainException("Email é obrigatório.");
            }
         }
+
+        public static void ValidarSenha(string senha)
+        {
+            if (string.IsNullOrWhiteSpace(senha))
+            {
+                throw new DomainException("Senha é obrigatória.");
+            }
+        }
     }
 }
