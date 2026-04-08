@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SistemaPatrimonio.Applications.Services;
 using SistemaPatrimonio.DTOs.LogPatrimonioDto;
@@ -28,7 +27,7 @@ namespace SistemaPatrimonio.Controllers
 
         [Authorize]
         [HttpGet("patrimonio/{id}")]
-        public ActionResult <List<ListarLogPatrimonioDto>> BuscarPorPatrimonio(Guid id)
+        public ActionResult<List<ListarLogPatrimonioDto>> BuscarPorPatrimonio(Guid id)
         {
             try
             {

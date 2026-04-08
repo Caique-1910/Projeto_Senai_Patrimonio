@@ -5,9 +5,12 @@ namespace SistemaPatrimonio.Interfaces
     public interface ISolicitacaoTransferenciaRepository
     {
         List<SolicitacaoTransferencia> Listar();
-        SolicitacaoTransferencia ObterPorId(Guid id);
+        SolicitacaoTransferencia BuscarPorId(Guid id);
+        bool ExisteSolicitacaoPendente(Guid patrimonioId);
+        bool UsuarioResponsavelDoLocal(Guid usuarioId, Guid localId);
+        StatusTransferencia BuscarStatusTransferenciaPorNome(string nomeStatus);
         void Adicionar(SolicitacaoTransferencia solicitacao);
-        void Atualizar(SolicitacaoTransferencia solicitacao);
-        public SolicitacaoTransferencia ObterPorJustificativa(string jus);
+        bool LocalExiste(Guid localId);
+        Patrimonio BuscarPatrimonioPorId(Guid patrimonioId);
     }
 }

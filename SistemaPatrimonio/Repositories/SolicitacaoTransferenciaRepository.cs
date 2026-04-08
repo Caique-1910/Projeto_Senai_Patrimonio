@@ -16,12 +16,34 @@ namespace SistemaPatrimonio.Repositories
 
         public List<SolicitacaoTransferencia> Listar()
         {
-            return _context.SolicitacaoTransferencia.ToList();
+            return _context.SolicitacaoTransferencia.OrderByDescending(s => s.DataCriacaoSolicitante).ToList();
         }
 
-        public SolicitacaoTransferencia ObterPorId(Guid id)
+        public SolicitacaoTransferencia BuscarPorId(Guid id)
         {
-            return _context.SolicitacaoTransferencia.FirstOrDefault(s => s.TransferenciaID == id);
+            return _context.SolicitacaoTransferencia.Find(id);
+        }
+
+        public StatusTransferencia BuscarStatusTransferenciaPorNome(string nomeStatus)
+        {
+            return _context.StatusTransferencia.FirstOrDefault(s => s.Status.ToLower() == nomeStatus.ToLower());
+        }
+
+        public bool ExisteSolicitacaoPendente(Guid patrimonioId)
+        {
+            StatusTransferencia statusPendente = BuscarStatusTransferenciaPorNome("Pendente de aprovação");
+
+            if(statusPendente == null)
+            {
+                return false;
+            }
+
+            return _context.SolicitacaoTransferencia.Any(s => s.PatrimonioID == patrimonioId && s.StatusPatrimonioID == statusPendente.StatusTransferenciaID);
+        }
+
+        public bool UsuarioResponsavelDoLocal(Guid usuarioId, Guid localId)
+        {
+            return _context.Usuario.Any(u => u.UsuarioID == usuarioId && u.LocalLocalUsuario.Any(l => l.LocalID == localId));
         }
 
         public void Adicionar(SolicitacaoTransferencia solicitacao)
@@ -30,36 +52,14 @@ namespace SistemaPatrimonio.Repositories
             _context.SaveChanges();
         }
 
-        public void Atualizar(SolicitacaoTransferencia solicitacao)
+        public bool LocalExiste(Guid localId)
         {
-            if (solicitacao == null)
-            {
-                return;
-            }
-
-            SolicitacaoTransferencia solicitacaoBanco = _context.SolicitacaoTransferencia.Find(solicitacao.TransferenciaID);
-
-            if (solicitacaoBanco == null)
-            {
-                return;
-            }
-
-            solicitacaoBanco.DataCriacaoSolicitante = solicitacao.DataCriacaoSolicitante;
-            solicitacaoBanco.DataResposta = solicitacao.DataResposta;
-            solicitacaoBanco.Justificativa = solicitacao.Justificativa;
-            solicitacaoBanco.PatrimonioID = solicitacao.PatrimonioID;
-            solicitacaoBanco.StatusTransferenciaID = solicitacao.StatusTransferenciaID;
-            solicitacaoBanco.StatusPatrimonioID = solicitacao.StatusPatrimonioID;
-            solicitacaoBanco.UsuarioIDSolicitacao = solicitacao.UsuarioIDSolicitacao;
-            solicitacaoBanco.UsuarioIDAprovacao = solicitacao.UsuarioIDAprovacao;
-            solicitacaoBanco.LocalID = solicitacao.LocalID;
-
-            _context.SaveChanges();
+            return _context.Local.Any(l => l.LocalID == localId);
         }
 
-        public SolicitacaoTransferencia ObterPorJustificativa(string jus)
+        public Patrimonio BuscarPatrimonioPorId(Guid patrimonioId)
         {
-            return _context.SolicitacaoTransferencia.FirstOrDefault(p => p.Justificativa.ToLower() == jus.ToLower());
+            return _context.Patrimonio.Find(patrimonioId);
         }
     }
 }
