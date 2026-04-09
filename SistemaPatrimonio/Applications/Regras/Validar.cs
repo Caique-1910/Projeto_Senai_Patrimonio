@@ -54,5 +54,13 @@ namespace SistemaPatrimonio.Applications.Regras
                 throw new DomainException("Senha é obrigatória.");
             }
         }
+
+        public static void ValidarJustificativa(string jus)
+        {
+            if (string.IsNullOrWhiteSpace(jus))
+            {
+                throw new DomainException("Justificativa é obrigatória.");
+            }
+        }
     }
 }

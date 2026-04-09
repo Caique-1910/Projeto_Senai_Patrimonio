@@ -61,5 +61,61 @@ namespace SistemaPatrimonio.Repositories
         {
             return _context.Patrimonio.Find(patrimonioId);
         }
+
+        public StatusPatrimonio BuscarStatusPatrimonioPorNome(string nomeStatus)
+        {
+            return _context.StatusPatrimonio.FirstOrDefault(s => s.Status.ToLower() == nomeStatus.ToLower());
+        }
+
+        public TipoAlteracao BuscarTipoAlteracaoPorNome(string nomeTipo)
+        {
+            return _context.TipoAlteracao.FirstOrDefault(t => t.Tipo.ToLower() == nomeTipo.ToLower());
+        }
+
+        public void Atualizar(SolicitacaoTransferencia solicitacao)
+        {
+            if (solicitacao == null)
+            {
+                return;
+            }
+
+            SolicitacaoTransferencia solcitacaoBanco = _context.SolicitacaoTransferencia.Find(solicitacao.TransferenciaID);
+
+            if (solcitacaoBanco == null)
+            {
+                return;
+            }
+
+            solcitacaoBanco.DataResposta = solicitacao.DataResposta;
+            solcitacaoBanco.StatusTransferenciaID = solicitacao.StatusTransferenciaID;
+            solcitacaoBanco.UsuarioIDAprovacao = solicitacao.UsuarioIDAprovacao;
+
+            _context.SaveChanges();
+        }
+
+        public void AtualizarPatrimonio(Patrimonio patrimonio)
+        {
+            if (patrimonio == null)
+            {
+                return;
+            }
+
+            Patrimonio patrimonioBanco = _context.Patrimonio.Find(patrimonio.PatrimonioID);
+
+            if (patrimonioBanco == null)
+            {
+                return;
+            }
+
+            patrimonioBanco.LocalID = patrimonio.LocalID;
+            patrimonioBanco.StatusPatrimonioID = patrimonio.StatusPatrimonioID;
+            _context.SaveChanges();
+        }
+
+        public void AdicionarLog(Log_Patrimonio log)
+        {
+            _context.Log_Patrimonio.Add(log);
+            _context.SaveChanges();
+        }
     }
 }
