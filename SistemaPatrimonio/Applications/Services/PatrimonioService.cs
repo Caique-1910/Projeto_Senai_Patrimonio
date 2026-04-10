@@ -1,8 +1,14 @@
-﻿using SistemaPatrimonio.Applications.Regras;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using SistemaPatrimonio.Applications.Regras;
 using SistemaPatrimonio.Domains;
 using SistemaPatrimonio.DTOs.PatrimonioDto;
 using SistemaPatrimonio.Exceptions;
 using SistemaPatrimonio.Interfaces;
+using System.Globalization;
+using SistemaPatrimonio.Applications.Mapeamentos;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+
 
 namespace SistemaPatrimonio.Applications.Services
 {
@@ -19,16 +25,15 @@ namespace SistemaPatrimonio.Applications.Services
         {
             List<Patrimonio> patrimonios = _repository.Listar();
 
-            List<ListarPatrimonioDto> patrimonioDtos = patrimonios.Select(sp => new ListarPatrimonioDto
+            List<ListarPatrimonioDto> patrimonioDtos = patrimonios.Select(p => new ListarPatrimonioDto
             {
-                PatrimonioID = sp.StatusPatrimonioID,
-                Denominacao = sp.Denominacao,
-                NumeroPatrimonio = sp.NumeroPatrimonio,
-                Valor = sp.Valor,
-                Imagem = sp.Imagem,
-                LocalID = sp.LocalID,
-                TipoPatrimonioID = sp.TipoPatrimonioID,
-                StatusPatrimonioID = sp.StatusPatrimonioID
+                PatrimonioID = p.StatusPatrimonioID,
+                Denominacao =p.Denominacao,
+                NumeroPatrimonio = p.NumeroPatrimonio,
+                Valor = p.Valor,
+                Imagem = p.Imagem,
+                LocalID = p.LocalID,
+                StatusPatrimonioID = p.StatusPatrimonioID
             }).ToList();
 
             return patrimonioDtos;
@@ -51,74 +56,156 @@ namespace SistemaPatrimonio.Applications.Services
                 Valor = patrimonio.Valor,
                 Imagem = patrimonio.Imagem,
                 LocalID = patrimonio.LocalID,
-                TipoPatrimonioID = patrimonio.TipoPatrimonioID,
                 StatusPatrimonioID = patrimonio.StatusPatrimonioID
             };
         }
 
-        public void Adicionar(CriarPatrimonioDto dto)
+        public void Adicionar(IFormFile arquivoCsv , Guid usuarioId)
         {
-            Patrimonio patrimonioExistente = _repository.BuscarPorNome(dto.Denominacao);
-
-            if (patrimonioExistente != null)
+            if (arquivoCsv == null || arquivoCsv.Length == 0)
             {
-                throw new DomainException("Já existe um patrimônio com esse número.");
+                throw new DomainException("Arquivo CSV é obrigatório.");
             }
 
-            Patrimonio patrimonio = new Patrimonio
+            Local localSemLocal = _repository.BuscarLocalPorNome("Sem local");
+
+            if (localSemLocal == null)
             {
-                PatrimonioID = Guid.NewGuid(),
-                Denominacao = dto.Denominacao,
-                NumeroPatrimonio = dto.NumeroPatrimonio,
-                Valor = dto.Valor,
-                Imagem = dto.Imagem,
-                LocalID = dto.LocalID,
-                TipoPatrimonioID = dto.TipoPatrimonioID,
-                StatusPatrimonioID = dto.StatusPatrimonioID
-            };
-
-            _repository.Adicionar(patrimonio);
-        }
-
-        public void Atualizar(Guid patrimonioId, CriarPatrimonioDto dto)
-        {
-            Patrimonio patrimonio = _repository.BuscarPorId(patrimonioId);
-
-            if (patrimonio == null)
-            {
-
-                throw new DomainException("Patrimônio não encontrado");
-            }
-            Patrimonio patrimonioComMesmoNumero = _repository.BuscarPorNome(dto.Denominacao);
-
-            if (patrimonioComMesmoNumero != null && patrimonioComMesmoNumero.PatrimonioID != patrimonioId)
-            {
-                throw new DomainException("Já existe um patrimônio com esse número.");
+                throw new DomainException("Localização 'Sem local' não cadastrada.");
             }
 
-            patrimonio.Denominacao = dto.Denominacao;
-            patrimonio.NumeroPatrimonio = dto.NumeroPatrimonio;
-            patrimonio.Valor = dto.Valor;
-            patrimonio.Imagem = dto.Imagem;
-            patrimonio.LocalID = dto.LocalID;
-            patrimonio.TipoPatrimonioID = dto.TipoPatrimonioID;
-            patrimonio.StatusPatrimonioID = dto.StatusPatrimonioID;
+            StatusPatrimonio statusAtivo = _repository.BuscarStatusPatrimonioPorNome("Ativo");
 
-            _repository.Atualizar(patrimonio);
-        }
-
-            public void AtualizarStatus(Guid patrimonioId, AtualizarStatusPatrimonioDto dto)
+            if (statusAtivo == null)
             {
-                Patrimonio patrimonio = _repository.BuscarPorId(patrimonioId);
-    
-                if (patrimonio == null)
+                throw new DomainException("Status 'Ativo' não cadastrado.");
+            }
+
+            TipoAlteracao tipoAlteracao = _repository.BuscarTipoAlteracaoPorNome("Atualização de dados");
+
+            if (tipoAlteracao == null)
+            {
+                throw new DomainException("Tipo de alteração 'Atualização de dados' não cadastrado.");
+            }
+
+            List<ImportarPatrimonioCsvDto> registros;
+
+            using (var stream = arquivoCsv.OpenReadStream())
+
+            using (var reader = new StreamReader(stream))
+
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ";" ,
+
+                HeaderValidated = null,
+
+                MissingFieldFound = null,
+
+                BadDataFound = null,
+
+                TrimOptions = TrimOptions.Trim
+            }))
+            {
+                csv.Context.RegisterClassMap<ImportarPatrimonioCsvMap>();
+
+                registros = csv.GetRecords<ImportarPatrimonioCsvDto>().ToList();
+            }
+            
+            var erros = new List<string>();
+
+            foreach (var item in registros)
+            {
+                if(string.IsNullOrWhiteSpace(item.NumeroPatrimonio))
                 {
-                    throw new DomainException("Patrimônio não encontrado");
+                    continue; 
                 }
-    
-                patrimonio.StatusPatrimonioID = dto.StatusPatrimonioID;
-    
-                _repository.AtualizarStatus(patrimonio);
+
+                string numeroPatrimonio = item.NumeroPatrimonio.Trim();
+
+                if(string.IsNullOrWhiteSpace(item.Denominacao))
+                {
+                    erros.Add($"Patrimonio {numeroPatrimonio} sem denominação");
+                }
+
+                string denominacao = item.Denominacao.Trim();
+
+                DateTime? dataIncorporacao = null;
+
+                if(!string.IsNullOrWhiteSpace(item.DataIncorporacao))
+                {
+                    if(DateTime.TryParse(item.DataIncorporacao, new CultureInfo("pt-BR"), DateTimeStyles.None, out DateTime dataConvertida))
+                    {
+                        dataIncorporacao = dataConvertida;
+                    }
+                }
+
+                decimal? valorAquisicao = null;
+
+                if(!string.IsNullOrWhiteSpace(item.ValorAquisicao))
+                {
+                    string valorTexto = item.ValorAquisicao.Replace(".", "").Replace(",", ".");
+
+                    if(decimal.TryParse(valorTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal valorCovertido))
+                    {
+                       valorAquisicao = valorCovertido; 
+                    }
+
+                    Validar.ValidarNumeroPatrimonio(numeroPatrimonio);
+                    Validar.ValidarNome(denominacao);
+
+                    bool patrimonioExistente = _repository.BuscarPorNumeroPatrimonio(numeroPatrimonio);
+
+                    if (patrimonioExistente == true)
+                    {
+                        continue;
+                    }
+
+                    Patrimonio patrimonio = new Patrimonio
+                    {
+                        Denominacao = denominacao,
+                        NumeroPatrimonio = numeroPatrimonio,
+                        Valor = valorAquisicao,
+                        Imagem = null,
+                        LocalID = localSemLocal.LocalID,
+                        StatusPatrimonioID = statusAtivo.StatusPatrimonioID
+                    };
+
+                    _repository.Adicionar(patrimonio);
+
+                    Log_Patrimonio log = new Log_Patrimonio
+                    {
+                        DataTransferencia = dataIncorporacao ?? DateTime.Now,
+                        TipoAlteracaoID = tipoAlteracao.TipoAlteracaoID,
+                        StatusPatrimonioID = patrimonio.StatusPatrimonioID,
+                        PatrimonioID = patrimonio.PatrimonioID,
+                        UsuarioID = usuarioId,
+                        LocalID = patrimonio.LocalID
+                    };
+
+                    _repository.AdicionarLog(log);
+                }
+
+            }
+        }
+
+        public void AtualizarStatus(Guid patrimonioId, AtualizarStatusPatrimonioDto dto)
+        {
+            Patrimonio patrimonioBanco = _repository.BuscarPorId(patrimonioId);
+
+            if (patrimonioBanco == null)
+            {
+                throw new DomainException("Patrimônio não encontrado.");
+            }
+
+            if (!_repository.StatusPatrimonioExiste(dto.StatusPatrimonioID))
+            {
+                throw new DomainException("Status de patrimônio informado não existe.");
+            }
+
+            patrimonioBanco.StatusPatrimonioID = dto.StatusPatrimonioID;
+
+            _repository.AtualizarStatus(patrimonioBanco);
         }
     }
 }

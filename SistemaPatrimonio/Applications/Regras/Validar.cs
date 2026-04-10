@@ -62,5 +62,13 @@ namespace SistemaPatrimonio.Applications.Regras
                 throw new DomainException("Justificativa é obrigatória.");
             }
         }
+
+        public static void ValidarNumeroPatrimonio(string numeroPatirmonio)
+        {
+            if (string.IsNullOrEmpty(numeroPatirmonio))
+            {
+                throw new DomainException("Número patrimonio é obrigatorio");
+            }
+        }
     }
 }

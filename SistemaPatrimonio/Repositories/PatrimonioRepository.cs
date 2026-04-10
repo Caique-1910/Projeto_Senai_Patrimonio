@@ -29,7 +29,38 @@ namespace SistemaPatrimonio.Repositories
             _context.SaveChanges();
         }
 
-        public void Atualizar(Patrimonio patrimonio) 
+        public bool BuscarPorNumeroPatrimonio(string numeroPatrimonio)
+        {
+            return _context.Patrimonio.Any(p => p.NumeroPatrimonio == numeroPatrimonio);
+        }
+
+        public bool LocalExiste(Guid localId)
+        {
+            return _context.Local.Any(l => l.LocalID == localId);
+        }
+
+        public bool StatusPatrimonioExiste(Guid statusPatrimonioId)
+        {
+            return _context.StatusPatrimonio.Any(st => st.StatusPatrimonioID == statusPatrimonioId);
+        }
+
+        public Local BuscarLocalPorNome(string nomeLocal)
+        {
+            return _context.Local.FirstOrDefault(l => l.Nome.ToLower() == nomeLocal.ToLower());
+        }
+
+        public StatusPatrimonio BuscarStatusPatrimonioPorNome(string nomeStatus)
+        {
+            return _context.StatusPatrimonio.FirstOrDefault(s => s.Status.ToLower() == nomeStatus.ToLower());
+        }
+
+        public TipoAlteracao BuscarTipoAlteracaoPorNome(string nomeTipo)
+        {
+            return _context.TipoAlteracao.FirstOrDefault(t=> t.Tipo.ToLower() == nomeTipo.ToLower());
+        }
+
+
+        public void AtualizarStatus(Patrimonio patrimonio)
         {
             if (patrimonio == null)
             {
@@ -43,33 +74,16 @@ namespace SistemaPatrimonio.Repositories
                 return;
             }
 
-            patrimonioBanco.Denominacao = patrimonio.Denominacao;
-            patrimonioBanco.Valor = patrimonio.Valor;
-            patrimonioBanco.NumeroPatrimonio = patrimonio.NumeroPatrimonio;
-            patrimonioBanco.Imagem = patrimonio.Imagem;
-            patrimonioBanco.TipoPatrimonioID = patrimonio.TipoPatrimonioID;
-            patrimonioBanco.LocalID = patrimonio.LocalID;
             patrimonioBanco.StatusPatrimonioID = patrimonio.StatusPatrimonioID;
 
             _context.SaveChanges();
         }
 
-        public Patrimonio BuscarPorNome(string nomePatrimonio)
+        public void AdicionarLog(Log_Patrimonio logPatrimonio)
         {
-            return _context.Patrimonio.FirstOrDefault(p => p.Denominacao.ToLower() == nomePatrimonio.ToLower());
-        }
-
-        public void AtualizarStatus(Patrimonio patri)
-        {
-            Patrimonio patrimonio = _context.Patrimonio.Find(patri.StatusPatrimonioID);
-
-            if (patrimonio == null)
-            {
-                return;
-            }
-
-            patrimonio.StatusPatrimonioID = patri.StatusPatrimonioID;
+            _context.Log_Patrimonio.Add(logPatrimonio);
             _context.SaveChanges();
         }
+
     }
 }

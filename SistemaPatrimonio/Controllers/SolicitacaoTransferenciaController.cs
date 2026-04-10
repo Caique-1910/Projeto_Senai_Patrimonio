@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using SistemaPatrimonio.Applications.Services;
 using SistemaPatrimonio.DTOs.SolicitacaoTransferenciaDto;
 using SistemaPatrimonio.Exceptions;
+using System.Security.Claims;
 
 namespace SistemaPatrimonio.Controllers
 {
@@ -40,5 +41,55 @@ namespace SistemaPatrimonio.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        [Authorize]
+        [HttpPost]
+        public ActionResult Adicionar(CriarSolicitacaoTransferenciaDto dto)
+        {
+            try
+            {
+                string usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if(string.IsNullOrWhiteSpace(usuarioIdClaim))
+                {
+                    return Unauthorized("Usuario não autenticado");
+                }
+
+                Guid id = Guid.Parse(usuarioIdClaim);
+
+                _service.Adicionar(id, dto);
+                return Created();
+            }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPatch("{id}/responder")]
+        public ActionResult Responder(Guid id, ResponderSolicitacaoTransferenciaDto dto)
+        {
+            try
+            {
+                string usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrWhiteSpace(usuarioIdClaim))
+                {
+                    return Unauthorized("Usuario não autenticado");
+                }
+
+                Guid usuarioid = Guid.Parse(usuarioIdClaim);
+
+                _service.Responder(id, usuarioid, dto);
+                return NoContent();
+            }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
     }
 }
